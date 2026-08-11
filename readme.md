@@ -2,7 +2,7 @@
 
 ## Overview
 
-You have been assigned to deploy and manage a new microservice for our infrastructure. The application is a lightweight Python service that is known to have a memory leak—it starts at around 100MB and slowly increases its memory footprint to 1GB over the course of 5 minutes. It also generates standard application logs. 
+You have been assigned to deploy and manage a new microservice for our infrastructure. The application is a lightweight Python service that is known to have a memory leak, it starts at around 100MB and slowly increases its memory footprint to 1GB over the course of 5 minutes. It also generates standard application logs. 
 
 Your mission is to build a secure delivery pipeline, implement a GitOps deployment strategy, and set up robust observability and alerting to catch the application when it inevitably crashes.
 
@@ -20,14 +20,15 @@ The application code is provided in the repository. Your first task is to contai
 1. **Dockerize the Application:**
    - Create an **optimal** `Dockerfile` for the provided Python application.
    - Keep the image size as small as possible while ensuring the application runs correctly.
-   - Follow container security best practices (e.g., use a minimal base image).
+   - Follow container security best practices (e.g., use a minimal base image, run as a non-root user).
 2. **Secure CI/CD Pipeline (GitHub Actions or similar):**
    - Create a pipeline that builds the Docker image.
+   - Design the pipeline so that it concurrently builds and tests the image against multiple different versions of the base runtime environment dynamically, without manually duplicating the pipeline jobs.
    - Integrate security scanning tools into the pipeline:
-     - **Secret Scanning** 
-     - **SAST** 
-     - **Container Image Vulnerability Scanning** 
-   - If the image passes all security checks, push it to a container registry.
+     - **Secret Scanning** (e.g., Gitleaks)
+     - **SAST** (Static Application Security Testing)
+     - **Container Image Vulnerability Scanning** (e.g., Trivy or Grype)
+   - If the image passes all security checks, push it to a container registry (e.g., Docker Hub, GHCR).
 
 ---
 
@@ -40,8 +41,9 @@ We use GitOps to manage our Kubernetes clusters. You need to automate the deploy
 2. **Kubernetes Manifests:**
    - Create the necessary Kubernetes manifests (Deployment, Service) for the application.
    - **Crucial:** Since the application has a known memory leak (designed to reach 500MB over 2 minutes), you must configure **Resource Requests and Limits** for the Pod. Set the memory limit explicitly to `400Mi` so that the Kubernetes scheduler terminates the pod (`OOMKilled`) well before it consumes node resources.
-3. **Automated Deployment:**
-   - Configure ArgoCD to track your repository and automatically deploy/sync the application whenever a new image or manifest change is pushed.
+3. **Automated Deployment & Image Updates:**
+   - Configure ArgoCD to track your repository and automatically deploy/sync the application.
+   - **Important:** Do NOT configure your CI/CD pipeline to commit and push image tag updates back to your configuration repository. Instead, implement a dedicated tool or controller that automatically monitors the container registry for new image tags and updates the deployment automatically.
 
 ---
 
@@ -50,8 +52,8 @@ We use GitOps to manage our Kubernetes clusters. You need to automate the deploy
 Visibility into the cluster and the application's behavior is critical.
 
 1. **Metrics & Dashboards:**
-   - Install **Prometheus** and **Grafana** in your cluster.
-   - Build a comprehensive Grafana Dashboard that displays:
+   - Install **Prometheus** and **Grafana** in your cluster(via Helm).
+   - Build a comprehensive Grafana Dashboard that displays(You Can also import them):
      - **Node Metrics:** CPU, Memory, and Disk usage.
      - **Pod & Cluster Metrics:** CPU and Memory usage per pod.
 2. **Log Aggregation to S3:**
