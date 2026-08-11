@@ -50,7 +50,7 @@ jobs:
         run: |
           pip install bandit
           bandit -r . -f custom
-        continue-on-error: true
+
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -73,7 +73,7 @@ jobs:
           exit-code: '0' # Set to 1 if you want to block the build on high/critical vulnerabilities
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
-        continue-on-error: true
+
 
       - name: Tag and Push Docker image
         if: github.event_name != 'pull_request'
