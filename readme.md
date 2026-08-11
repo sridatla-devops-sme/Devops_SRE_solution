@@ -7,7 +7,7 @@ You have been assigned to deploy and manage a new microservice for our infrastru
 Your mission is to build a secure delivery pipeline, implement a GitOps deployment strategy, and set up robust observability and alerting to catch the application when it inevitably crashes.
 
 **Rules:**
-- Everything should be done using free/open-source tools running locally (e.g., Minikube, Kind, K3d), EXCEPT for the S3 bucket configuration which requires a cloud account.
+- Everything should be done using free/open-source tools running locally (e.g., Minikube, Kind, K3d). No cloud accounts are required.
 - Security controls are currently enforced **only** in the CI/CD pipeline. 
 - Provide clear documentation on your setup, architecture, and instructions to reproduce your environment.
 
@@ -25,7 +25,7 @@ The application code is provided in the repository. Your first task is to contai
    - Create a pipeline that builds the Docker image.
    - Design the pipeline so that it concurrently builds and tests the image against multiple different versions of the base runtime environment dynamically, without manually duplicating the pipeline jobs.
    - Integrate security scanning tools into the pipeline:
-     - **Secret Scanning** (e.g., Gitleaks)
+     - **Secret Scanning** (e.g., Gitleaks) *(Optional)*
      - **SAST** (Static Application Security Testing)
      - **Container Image Vulnerability Scanning** (e.g., Trivy or Grype)
    - If the image passes all security checks, push it to a container registry (e.g., Docker Hub, GHCR).
@@ -44,6 +44,13 @@ We use GitOps to manage our Kubernetes clusters. You need to automate the deploy
 3. **Automated Deployment & Image Updates:**
    - Configure ArgoCD to track your repository and automatically deploy/sync the application.
    - **Important:** Do NOT configure your CI/CD pipeline to commit and push image tag updates back to your configuration repository. Instead, implement a dedicated tool or controller that automatically monitors the container registry for new image tags and updates the deployment automatically.
+   
+   > **Educational Note: ArgoCD Image Updater**
+   > *Why we use it:* Updating image tags in Git via a CI pipeline requires giving your CI runner write access to your Git repository, which can be a security risk and clutters your git history with automated commits.
+   > *How it works:* ArgoCD Image Updater polls your container registry for new tags. When it detects a new tag that matches your criteria (e.g., a specific semantic version range or regex), it signals ArgoCD to update the application.
+   > *Ways of using it:* 
+   > 1. **Imperative (Direct) Update:** The updater directly modifies the ArgoCD Application resource in the cluster's memory/etcd (fast, but causes drift from Git).
+   > 2. **Declarative (Git Write-back):** The updater commits the new tag back to Git (maintains GitOps purity). For this assessment, you may use either method as long as the CI pipeline isn't doing the git commit!
 
 ---
 
@@ -56,10 +63,7 @@ Visibility into the cluster and the application's behavior is critical.
    - Build a comprehensive Grafana Dashboard that displays(You Can also import them):
      - **Node Metrics:** CPU, Memory, and Disk usage.
      - **Pod & Cluster Metrics:** CPU and Memory usage per pod.
-2. **Log Aggregation to S3:**
-   - Deploy a log collector tool of your choice (as a DaemonSet) to capture both cluster and application logs.
-   - Configure the log collector to forward these logs to an **AWS S3 Bucket** for long-term retention. *(Note: This is the only part of the assignment that requires a cloud provider).*
-3. **Alerting:**
+2. **Alerting:**
    - Configure Prometheus/Alertmanager rules to trigger alerts for the following scenarios:
      - **Application Health Check Failures** (Pod goes down or becomes unready).
      - **OOMKilled Events** (Triggered when the application hits its memory limit).
@@ -72,5 +76,5 @@ Visibility into the cluster and the application's behavior is critical.
 - **Security Posture:** Quality of the Dockerfile and thoroughness of the CI/CD security gates.
 - **GitOps Implementation:** A working ArgoCD setup that successfully detects and deploys changes.
 - **Kubernetes Expertise:** Correct implementation of resource limits ensuring the `OOMKilled` behavior occurs as intended.
-- **Observability:** A functional, well-designed Grafana dashboard and successful routing of logs to S3.
+- **Observability:** A functional, well-designed Grafana dashboard.
 - **Reliability Engineering:** Accurate and functional alerting rules for health checks and OOM limits.
