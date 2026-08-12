@@ -55,7 +55,7 @@ spec:
     spec:
       containers:
       - name: memory-hog-container
-        image: ghcr.io/varma1316/Devops_SRE_solution:3.10-YOUR_GIT_SHA
+        image: ghcr.io/varma1316/devops_sre_solution:3.10-535f9e5c5f00d1a3aea4cc1ecf5d2c1c18700b29
         imagePullPolicy: Always
         resources:
           requests:
