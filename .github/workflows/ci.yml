@@ -102,7 +102,7 @@ jobs:
           cd .. # go back to root of repo to run git commands
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
-          git add k8s/deployment.yaml
+          git add ../config/k8s/deployment.yaml
           git commit -m "chore(cd): update image tag for ${{ matrix.python-version }} to ${{ github.sha }} [skip ci]" || echo "No changes to commit"
           
           # Pull with rebase to minimize race conditions, then push (with retry)
