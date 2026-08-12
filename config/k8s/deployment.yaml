@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: memory-hog-container
-        image: ghcr.io/[YOUR_GITHUB_USERNAME]/[YOUR_REPO_NAME]:3.9-[YOUR_GIT_SHA]
+        image: ghcr.io/varma1316/devops_sre_solution:3.9-535f9e5c5f00d1a3aea4cc1ecf5d2c1c18700b29
         imagePullPolicy: Always
         resources:
           requests:
@@ -55,7 +55,7 @@ spec:
     spec:
       containers:
       - name: memory-hog-container
-        image: ghcr.io/[YOUR_GITHUB_USERNAME]/[YOUR_REPO_NAME]:3.10-[YOUR_GIT_SHA]
+        image: ghcr.io/varma1316/devops_sre_solution:3.10-535f9e5c5f00d1a3aea4cc1ecf5d2c1c18700b29
         imagePullPolicy: Always
         resources:
           requests:
@@ -92,7 +92,7 @@ spec:
     spec:
       containers:
       - name: memory-hog-container
-        image: ghcr.io/[YOUR_GITHUB_USERNAME]/[YOUR_REPO_NAME]:3.11-[YOUR_GIT_SHA]
+        image: ghcr.io/varma1316/devops_sre_solution:3.11-535f9e5c5f00d1a3aea4cc1ecf5d2c1c18700b29
         imagePullPolicy: Always
         resources:
           requests:

@@ -6,12 +6,12 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: '[YOUR_GITHUB_REPO_URL]' # e.g., https://github.com/username/project_devops.git
+    repoURL: 'https://github.com/varma1316/Devops_SRE_solution.git' # e.g., https://github.com/username/project_devops.git
     targetRevision: HEAD
-    path: k8s # The path where the deployment.yaml is stored
+    path: ./config/k8s # The path where the deployment.yaml is stored
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: argocd
+    namespace: default
   syncPolicy:
     automated:
       prune: true
