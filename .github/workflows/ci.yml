@@ -90,27 +90,26 @@ jobs:
           docker push $IMAGE_ID:${{ matrix.python-version }}-${{ github.sha }}
 
       - name: Update GitOps Deployment Manifest
-        if: github.event_name != 'pull_request' && matrix.python-version == '3.11'
+        if: github.event_name != 'pull_request'
         run: |
           IMAGE_ID=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[A-Z]' '[a-z]')
-          NEW_IMAGE="${IMAGE_ID}:3.11-${{ github.sha }}"
+          NEW_IMAGE="${IMAGE_ID}:${{ matrix.python-version }}-${{ github.sha }}"
           
-          # Assuming the Kubernetes manifests are in a 'k8s' directory
-          mkdir -p ../k8s
-          if [ ! -f ../k8s/deployment.yaml ]; then
-            echo -e "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: myapp\nspec:\n  template:\n    spec:\n      containers:\n      - name: myapp\n        image: placeholder-image:latest" > ../k8s/deployment.yaml
-          fi
-          
-          # Update the image tag in the deployment manifest
-          sed -i "s|image: .*|image: $NEW_IMAGE|g" ../k8s/deployment.yaml
+          # Update the specific image tag for this Python version
+          sed -i "s|image: .*:${{ matrix.python-version }}-.*|image: $NEW_IMAGE|g" ../config/k8s/deployment.yaml
           
           # Commit and push the changes back to the repository
           cd .. # go back to root of repo to run git commands
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
           git add k8s/deployment.yaml
-          git commit -m "chore(cd): update image tag to 3.11-${{ github.sha }} [skip ci]" || echo "No changes to commit"
+          git commit -m "chore(cd): update image tag for ${{ matrix.python-version }} to ${{ github.sha }} [skip ci]" || echo "No changes to commit"
           
-          # Pull with rebase to minimize race conditions, then push
-          git pull --rebase origin master
-          git push origin master
+          # Pull with rebase to minimize race conditions, then push (with retry)
+          n=0
+          until [ "$n" -ge 5 ]
+          do
+             git pull --rebase origin master && git push origin master && break
+             n=$((n+1)) 
+             sleep 5
+          done
